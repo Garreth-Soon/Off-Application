@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Off Day Wallet</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f2f5f7;--card:#fff;--ink:#132238;--mute:#5d6b7c;--line:#dde3ea;--ok:#1f8a70;--warn:#c98410;--bad:#cf3b3b;--brand:#132238;--onbrand:#fff;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0c1522;--card:#14202f;--ink:#e8eef5;--mute:#93a3b5;--line:#25354a;--ok:#4cc4a4;--warn:#e8b04a;--bad:#f06a6a;--brand:#e8eef5;--onbrand:#0c1522}}
+:root[data-theme="dark"]{--bg:#0c1522;--card:#14202f;--ink:#e8eef5;--mute:#93a3b5;--line:#25354a;--ok:#4cc4a4;--warn:#e8b04a;--bad:#f06a6a;--brand:#e8eef5;--onbrand:#0c1522}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "Bricolage Grotesque",system-ui,-apple-system,"Segoe UI",sans-serif}
+.wrap{max-width:860px;margin:0 auto;padding:20px 16px 48px}
+h1{font-size:1.6rem;margin:0;font-weight:800;letter-spacing:-.02em}
+h2{font-size:1.1rem;margin:28px 0 10px;font-weight:600}
+.sub{color:var(--mute);margin:2px 0 16px}
+.tabs{display:flex;gap:6px;margin:14px 0 8px;flex-wrap:wrap}
+.tabs button,.btn{font:inherit;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:8px 14px;border-radius:8px;cursor:pointer}
+.tabs button.on,.btn.pri{background:var(--brand);color:var(--onbrand);border-color:var(--brand)}
+button:focus-visible,input:focus-visible{outline:3px solid var(--warn);outline-offset:2px}
+.btn.sm{padding:5px 10px;font-size:.9rem}
+.hero{background:var(--brand);color:var(--onbrand);border-radius:14px;padding:22px;display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.hero .n{font-size:3.4rem;font-weight:800;line-height:1}
+.hero p{margin:0;opacity:.85}
+.row{background:var(--card);border:1px solid var(--line);border-left:6px solid var(--ok);border-radius:10px;padding:12px 14px;margin-bottom:8px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.row.amber{border-left-color:var(--warn)}.row.red{border-left-color:var(--bad)}.row.done{opacity:.6;border-left-color:var(--line)}
+.row .grow{flex:1;min-width:160px}
+.big{font-weight:800;font-size:1.3rem}
+.red .big{color:var(--bad)}.amber .big{color:var(--warn)}.row:not(.red):not(.amber) .big{color:var(--ok)}
+.mute{color:var(--mute);font-size:.9rem}
+.tag{display:inline-block;font-size:.8rem;border:1px solid var(--line);border-radius:99px;padding:1px 9px;margin-right:4px;color:var(--mute)}
+.tip{background:var(--card);border:1px dashed var(--warn);border-radius:10px;padding:10px 14px;margin:12px 0}
+.note{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin-bottom:8px}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;background:var(--card);border:1px solid var(--line);border-radius:10px}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);font-size:.95rem}
+.bar{height:14px;background:var(--bad);border-radius:4px;min-width:2px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.stat b{font-size:1.8rem;display:block}
+dialog{border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);padding:20px;max-width:380px;width:92%}
+dialog::backdrop{background:rgba(0,0,0,.5)}
+input[type=date]{font:inherit;padding:8px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);width:100%;margin:8px 0 14px}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--brand);color:var(--onbrand);padding:10px 18px;border-radius:99px;display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Off Day Wallet</h1>
+  <p class="sub">Every OFF day you've earned, and when it expires. Demo data, today is <span id="today"></span>.</p>
+  <div class="tabs" role="tablist" id="tabs"></div>
+  <main id="view"></main>
+</div>
+<dialog id="dlg">
+  <h3 style="margin:0 0 4px">Use this OFF day</h3>
+  <div class="mute" id="dlgInfo"></div>
+  <label for="dlgDate" class="mute">Date you want off</label>
+  <input type="date" id="dlgDate">
+  <div style="display:flex;gap:8px;justify-content:flex-end">
+    <button class="btn" id="dlgCancel">Cancel</button>
+    <button class="btn pri" id="dlgOk">Send request</button>
+  </div>
+</dialog>
+<div class="toast" id="toast" role="status"></div>
+<script>
+const DAY=864e5;
+const T0=new Date();T0.setHours(0,0,0,0);
+const add=n=>new Date(T0.getTime()+n*DAY);
+const iso=d=>{const x=new Date(d.getTime()-d.getTimezoneOffset()*6e4);return x.toISOString().slice(0,10)};
+const fmt=d=>d.toLocaleDateString('en-SG',{day:'numeric',month:'short',year:'numeric'});
+const left=c=>Math.round((c.expiry-T0)/DAY);
+
+const emps=[
+ {id:1,name:'Aisha Rahman',dept:'Engineering'},
+ {id:2,name:'Ben Tan',dept:'Engineering'},
+ {id:3,name:'Chloe Lim',dept:'Engineering'},
+ {id:4,name:'Dev Nair',dept:'Operations'},
+ {id:5,name:'Elena Koh',dept:'Operations'},
+ {id:6,name:'Farid Ismail',dept:'Sales'}
+];
+let id=0;
+const mk=(emp,earnedAgo,life,status='unused')=>({id:++id,emp,earned:add(-earnedAgo),expiry:add(-earnedAgo+life),status});
+// each OFF day credit lives 90 days from the date earned
+const credits=[
+ mk(1,84,90),mk(1,70,90),mk(1,55,90),mk(1,20,90),
+ mk(2,88,90),mk(2,60,90),mk(2,10,90),
+ mk(3,80,90),mk(3,30,90),
+ mk(4,86,90),mk(4,85,90),mk(4,40,90),
+ mk(5,50,90),
+ mk(6,75,90),mk(6,15,90),
+ // already expired, for analytics
+ mk(2,100,90,'expired'),mk(4,110,90,'expired'),mk(4,120,90,'expired'),mk(6,95,90,'expired'),mk(1,105,90,'expired'),mk(5,130,90,'expired')
+];
+const inbox=[];
+let role='emp',pick=null;
+const THRESH=[30,14,7,3,1];
+
+const $=s=>document.querySelector(s);
+const name=i=>emps.find(e=>e.id===i).name;
+const cls=d=>d<=7?'red':d<=30?'amber':'';
+const active=c=>c.status==='unused'||c.status==='pending';
+
+function toast(m){const t=$('#toast');t.textContent=m;t.style.display='block';clearTimeout(toast.h);toast.h=setTimeout(()=>t.style.display='none',2600)}
+
+function tabs(){
+ const t=[['emp','Employee'],['mgr','Manager'],['hr','HR'],['msg','Reminders']];
+ $('#tabs').innerHTML=t.map(([k,l])=>`<button role="tab" aria-selected="${role===k}" class="${role===k?'on':''}" data-k="${k}">${l}${k==='msg'&&inbox.length?` (${inbox.length})`:''}</button>`).join('');
+ $('#tabs').querySelectorAll('button').forEach(b=>b.onclick=()=>{role=b.dataset.k;render()});
+}
+
+function suggest(){
+ // suggest the next Friday or Monday at least 2 days ahead, to make a long weekend
+ for(let n=2;n<40;n++){const d=add(n);if(d.getDay()===5||d.getDay()===1)return d}
+ return add(2);
+}
+
+function empView(){
+ const mine=credits.filter(c=>c.emp===1&&active(c)).sort((a,b)=>a.expiry-b.expiry);
+ const soon=mine.filter(c=>left(c)<=14&&c.status==='unused').length;
+ const s=suggest();
+ return `<div class="hero"><div class="n">${mine.length}</div><div><b>OFF days in your wallet</b><p>${soon?`${soon} expire within 14 days. Use them before you lose them.`:'Nothing expires soon. Nice planning.'}</p></div></div>
+ <div class="tip"><b>Smart suggestion:</b> take <b>${s.toLocaleDateString('en-SG',{weekday:'long',day:'numeric',month:'short'})}</b> to get a long weekend with your oldest expiring day.</div>
+ <h2>Your OFF days, soonest expiry first</h2>
+ ${mine.map(c=>{const d=left(c);return `<div class="row ${c.status==='pending'?'':cls(d)}">
+   <div class="grow"><b>OFF day earned ${fmt(c.earned)}</b><div class="mute">Expires ${fmt(c.expiry)}</div></div>
+   ${c.status==='pending'?`<span class="tag">Waiting for manager: ${fmt(c.useDate)}</span>`:`<div class="big">${d} days left</div><button class="btn pri sm" data-use="${c.id}">Use it now</button>`}
+ </div>`}).join('')||'<div class="note">No OFF days in your wallet.</div>'}
+ <h2>Already used</h2>
+ ${credits.filter(c=>c.emp===1&&c.status==='used').map(c=>`<div class="row done"><div class="grow">Earned ${fmt(c.earned)}</div><span class="tag">Taken ${fmt(c.useDate)}</span></div>`).join('')||'<div class="mute">Nothing yet.</div>'}`;
+}
+
+function mgrView(){
+ const team=emps.filter(e=>e.dept==='Engineering');
+ const pend=credits.filter(c=>c.status==='pending');
+ return `<h2>Engineering team</h2><p class="sub">See who has days about to expire, so you can approve and plan cover in time.</p>
+ <div class="scroll"><table><tr><th>Name</th><th>Days left</th><th>Expiring in 14 days</th><th>Next expiry</th></tr>
+ ${team.map(e=>{const a=credits.filter(c=>c.emp===e.id&&active(c)).sort((x,y)=>x.expiry-y.expiry);const u=a.filter(c=>left(c)<=14).length;
+ return `<tr><td>${e.name}</td><td>${a.length}</td><td style="color:${u?'var(--bad)':'inherit'};font-weight:${u?800:400}">${u}</td><td>${a[0]?fmt(a[0].expiry):'-'}</td></tr>`}).join('')}</table></div>
+ <h2>Requests to approve</h2>
+ ${pend.map(c=>`<div class="row"><div class="grow"><b>${name(c.emp)}</b><div class="mute">Wants ${fmt(c.useDate)}. Day expires ${fmt(c.expiry)}.</div></div><button class="btn pri sm" data-ok="${c.id}">Approve</button></div>`).join('')||'<div class="note">No requests waiting.</div>'}`;
+}
+
+function hrView(){
+ const exp=credits.filter(c=>c.status==='expired'),used=credits.filter(c=>c.status==='used'),risk=credits.filter(c=>c.status==='unused'&&left(c)<=14);
+ const depts=[...new Set(emps.map(e=>e.dept))];
+ const w=depts.map(d=>[d,exp.filter(c=>emps.find(e=>e.id===c.emp).dept===d).length]);
+ const mx=Math.max(1,...w.map(x=>x[1]));
+ return `<h2>Wasted OFF days</h2>
+ <div class="stats"><div class="stat"><b>${exp.length}</b>expired unused</div><div class="stat"><b>${risk.length}</b>at risk in 14 days</div><div class="stat"><b>${used.length}</b>taken so far</div></div>
+ <h2>Expired unused, by department</h2>
+ ${w.map(([d,n])=>`<div style="display:flex;gap:10px;align-items:center;margin-bottom:6px"><div style="width:110px">${d}</div><div class="bar" style="width:${n/mx*60}%"></div><b>${n}</b></div>`).join('')}
+ <h2>Expiry rule</h2><div class="note">OFF days expire <b>90 days</b> after they are earned. Reminders go out at ${THRESH.join(', ')} days before expiry by email and chat.</div>`;
+}
+
+function msgView(){
+ return `<h2>Reminder log</h2><p class="sub">The daily scheduler checks every unused OFF day and sends a reminder when it hits a milestone. Run it here to see it work.</p>
+ <button class="btn pri" id="run">Run daily check</button>
+ <div style="margin-top:14px">${inbox.slice().reverse().map(m=>`<div class="note"><span class="tag">${m.ch}</span><b>${m.to}</b><div>${m.text}</div></div>`).join('')||'<div class="mute">No reminders sent yet.</div>'}</div>`;
+}
+
+function runCheck(){
+ let n=0;
+ credits.filter(c=>c.status==='unused').forEach(c=>{
+  const d=left(c);
+  const th=THRESH.filter(t=>d<=t).sort((a,b)=>a-b)[0];
+  if(th===undefined||c.sent===th)return;
+  c.sent=th;n++;
+  const tone=d<=3?'Last chance:':d<=7?'Heads up:':'Reminder:';
+  inbox.push({to:name(c.emp),ch:d<=7?'Email + Chat':'Email',text:`${tone} your OFF day earned ${fmt(c.earned)} expires in ${d} day${d===1?'':'s'} (${fmt(c.expiry)}). Tap to use it now.`});
+ });
+ toast(n?`${n} reminders sent`:'No new reminders due');
+ render();
+}
+
+function render(){
+ tabs();$('#today').textContent=fmt(T0);
+ $('#view').innerHTML={emp:empView,mgr:mgrView,hr:hrView,msg:msgView}[role]();
+ document.querySelectorAll('[data-use]').forEach(b=>b.onclick=()=>{pick=credits.find(c=>c.id==b.dataset.use);
+  $('#dlgInfo').textContent=`Expires ${fmt(pick.expiry)}. Pick a date on or before then.`;
+  const s=suggest();const dt=s<pick.expiry?s:add(1);
+  $('#dlgDate').value=iso(dt);$('#dlgDate').min=iso(add(1));$('#dlgDate').max=iso(pick.expiry);$('#dlg').showModal()});
+ document.querySelectorAll('[data-ok]').forEach(b=>b.onclick=()=>{const c=credits.find(c=>c.id==b.dataset.ok);c.status='used';toast('Approved');render()});
+ const r=$('#run');if(r)r.onclick=runCheck;
+}
+$('#dlgCancel').onclick=()=>$('#dlg').close();
+$('#dlgOk').onclick=()=>{
+ const v=$('#dlgDate').value;if(!v)return;
+ pick.useDate=new Date(v+'T00:00:00');pick.status='pending';$('#dlg').close();toast('Request sent to your manager');render();
+};
+render();
+</script>
+</body>
+</html>
