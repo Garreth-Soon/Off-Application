@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Off Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#e9f0ee;--card:#fff;--ink:#12302f;--mute:#5d7573;--line:#cfdcd9;--acc:#17766a;--accfg:#fff;--warn:#b45309;--warnbg:#fdf0dc;--bad:#b4234a;--badbg:#fbe4ea;--ok:#17766a;--okbg:#dcf1ec;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1a19;--card:#152625;--ink:#e3f0ee;--mute:#93aeab;--line:#28403e;--acc:#4fc3af;--accfg:#08201c;--warn:#f3b562;--warnbg:#3a2a10;--bad:#f28aa6;--badbg:#3d1522;--ok:#4fc3af;--okbg:#12362f}}
+:root[data-theme="dark"]{--bg:#0e1a19;--card:#152625;--ink:#e3f0ee;--mute:#93aeab;--line:#28403e;--acc:#4fc3af;--accfg:#08201c;--warn:#f3b562;--warnbg:#3a2a10;--bad:#f28aa6;--badbg:#3d1522;--ok:#4fc3af;--okbg:#12362f}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.5 "Bricolage Grotesque",system-ui,-apple-system,"Segoe UI",sans-serif}
+.wrap{max-width:880px;margin:0 auto;padding:20px 16px 60px}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:24px;flex-wrap:wrap}
+h1{font-size:1.4rem;font-weight:800;margin:0;letter-spacing:-.02em}
+h2{font-size:1.1rem;font-weight:600;margin:0 0 12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px;margin-bottom:16px}
+.who{display:flex;align-items:center;gap:10px;color:var(--mute);font-size:.9rem}
+button,.btn{font:inherit;font-weight:600;border:0;border-radius:8px;padding:9px 16px;cursor:pointer;background:var(--acc);color:var(--accfg)}
+button.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+button.bad{background:var(--badbg);color:var(--bad)}
+button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+label{display:block;font-weight:600;font-size:.9rem;margin:12px 0 4px}
+input,textarea,select{font:inherit;width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)}
+textarea{min-height:88px;resize:vertical}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:560px){.row{grid-template-columns:1fr}}
+.hero{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.big{font-size:4.5rem;font-weight:800;line-height:1;letter-spacing:-.04em}
+.batch{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;padding:12px 0;border-top:1px solid var(--line);align-items:center}
+.batch .d{font-weight:800;font-size:1.3rem}
+.bar{grid-column:1/-1;height:6px;background:var(--line);border-radius:3px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--acc)}
+.batch.soon .bar i{background:var(--warn)}
+.batch.soon .exp{color:var(--warn);font-weight:600}
+.exp,.mute{color:var(--mute);font-size:.9rem}
+.pill{display:inline-block;padding:2px 10px;border-radius:99px;font-size:.8rem;font-weight:600}
+.pending{background:var(--warnbg);color:var(--warn)}.approved{background:var(--okbg);color:var(--ok)}.rejected{background:var(--badbg);color:var(--bad)}
+.req{border-top:1px solid var(--line);padding:14px 0}
+.req:first-of-type{border-top:0}
+.req .top{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center}
+.remarks{margin:8px 0;padding:8px 12px;border-left:3px solid var(--line);color:var(--mute);white-space:pre-wrap}
+.actions{display:flex;gap:8px;margin-top:8px}
+.notice{background:var(--warnbg);color:var(--warn);border-radius:10px;padding:10px 14px;margin-bottom:16px;font-weight:600}
+.err{color:var(--bad);font-size:.9rem;margin-top:8px;min-height:1.2em}
+table{width:100%;border-collapse:collapse;font-size:.95rem}
+th,td{text-align:left;padding:9px 6px;border-top:1px solid var(--line)}
+th{border-top:0;color:var(--mute);font-weight:600}
+.scroll{overflow-x:auto}
+.login{max-width:380px;margin:8vh auto 0}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:10px;font-weight:600;z-index:9}
+.tabs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
+.tab{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.tab.on{background:var(--acc);color:var(--accfg);border-color:var(--acc)}
+.cancelled,.withdrawn{background:var(--line);color:var(--mute)}
+.row3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.dow{font-size:.75rem;color:var(--mute);text-align:center}
+.day{display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-height:76px;padding:5px;background:var(--bg);color:var(--ink);border:1px solid var(--line);font-weight:400;text-align:left;border-radius:8px;overflow:hidden}
+.day b{font-size:.85rem}.day.tod{border-color:var(--acc)}.day.sel{outline:3px solid var(--acc);outline-offset:-1px}
+.sh{font-size:.68rem;line-height:1.2;color:var(--mute)}.sh.low{color:var(--warn);font-weight:600}
+.offc{font-size:.68rem;font-weight:600;color:var(--bad)}
+.mnav{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+@media (max-width:560px){.row3{grid-template-columns:1fr}.sh,.offc{font-size:.58rem}.day{min-height:64px;padding:3px}}
+</style></head>
+<body><div class="wrap" id="app"></div>
+<script>
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const today=()=>iso(new Date());
+const plus=n=>{const d=new Date();d.setDate(d.getDate()+n);return iso(d)};
+const fmt=d=>new Date(d+'T00:00').toLocaleDateString('en-SG',{day:'numeric',month:'short',year:'numeric'});
+const left=d=>Math.round((new Date(d+'T00:00')-new Date(today()+'T00:00'))/864e5);
+const sha=async s=>{try{const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode('off:'+s));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}catch(e){return'p:'+s}};
+let db=null,staff={},reqs={},me=null,shared=false,seen=null,dirty=false;
+let teamCfg={A:'2026-09-28',B:'2026-09-30',C:'2026-10-02'},ui={tab:'req',month:today().slice(0,7),day:null,cancelFor:null};
+
+async function seedData(){
+  const mk=async(id,name,role,pw,batches,team)=>[id,{name,role,pass:await sha(pw),batches,...(team?{team}:{})}];
+  return Object.fromEntries(await Promise.all([
+    mk('admin','Admin','admin','admin123',[]),
+    mk('alice','Alice Tan','user','alice123',[{days:2,expires:plus(9)},{days:3,expires:plus(60)}],'A'),
+    mk('ben','Ben Lim','user','ben123',[{days:1.5,expires:plus(30)}],'B'),
+    mk('carol','Carol Ng','user','carol123',[{days:2,expires:plus(45)}],'C')
+  ]));
+}
+async function init(){
+  try{const c=window.claude&&await claude.use('db');if(c)db=c}catch(e){}
+  if(db){
+    try{
+      const a=await db.doc('staff/admin').get();
+      if(!a.exists){const s=await seedData();for(const k in s)await db.doc('staff/'+k).set(s[k])}
+      db.collection('staff').onSnapshot(s=>{staff={};s.docs.forEach(d=>staff[d.id]=d.data());sync()});
+      db.collection('requests').onSnapshot(s=>{reqs={};s.docs.forEach(d=>reqs[d.id]=d.data());sync()});
+      db.doc('config/teams').onSnapshot(d=>{if(d.exists)teamCfg=d.data();sync()});
+      shared=true;
+    }catch(e){db=null}
+  }
+  if(!db){staff=await seedData();sync()}
+  try{const m=sessionStorage.getItem('off_me');if(m)me=m}catch(e){}
+  render();
+}
+function sync(){
+  if(me&&!staff[me])me=null;
+  if(me&&staff[me].role==='admin'){
+    const p=pendKeys();
+    if(seen&&p.some(k=>!seen.has(k))){const k=p.find(k=>!seen.has(k)),r=reqs[k.slice(2)];toast(k[0]==='c'?r.name+' asked to cancel an off':'New off application from '+r.name)}
+    seen=new Set(p);
+  }
+  const a=document.activeElement;
+  if(me&&a&&/INPUT|TEXTAREA|SELECT/.test(a.tagName)){dirty=true;return}
+  render();
+}
+document.addEventListener('focusout',()=>setTimeout(()=>{if(dirty&&!/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)){dirty=false;render()}},50));
+function toast(t){const e=document.createElement('div');e.className='toast';e.textContent=t;document.body.appendChild(e);setTimeout(()=>e.remove(),4000)}
+async function put(col,id,data){if(db)await db.doc(col+'/'+id).set(data);else{if(col==='config')teamCfg=data;else(col==='staff'?staff:reqs)[id]=data;render()}}
+
+const bal=u=>u.batches.filter(b=>b.expires>=today()).reduce((a,b)=>a+b.days,0);
+const pendingDays=id=>Object.values(reqs).filter(r=>r.user===id&&r.status==='pending').reduce((a,r)=>a+r.days,0);
+function deduct(u,n){
+  const used=[],bs=u.batches.filter(b=>b.expires>=today()).sort((a,b)=>a.expires<b.expires?-1:1);
+  for(const b of bs){const t=Math.min(b.days,n);b.days-=t;n-=t;used.push({days:t,expires:b.expires});if(n<=0)break}
+  u.batches=u.batches.filter(b=>b.days>0);return used;
+}
+const nextExp=u=>{const b=u.batches.filter(b=>b.expires>=today()).sort((a,b)=>a.expires<b.expires?-1:1)[0];return b?fmt(b.expires):'-'};
+const pill=s=>`<span class="pill ${s}">${s[0].toUpperCase()+s.slice(1)}</span>`;
+
+function render(){
+  const app=$('#app');
+  if(!me){
+    app.innerHTML=`<div class="card login"><h1>Off Tracker</h1><p class="mute">Sign in to view your off balance or manage applications.</p>
+    <form id="login"><label for="u">Username</label><input id="u" autocomplete="username" required>
+    <label for="p">Password</label><input id="p" type="password" autocomplete="current-password" required>
+    <div class="err" id="lerr"></div><button style="width:100%;margin-top:6px">Sign in</button></form>
+    <p class="mute" style="margin-top:16px">Demo accounts: admin / admin123, alice / alice123, ben / ben123</p>
+    ${shared?'':'<p class="mute">Shared storage is unavailable here, so changes stay in this browser tab only.</p>'}</div>`;
+    return;
+  }
+  const u=staff[me];
+  app.innerHTML=`<header><h1>Off Tracker</h1><div class="who"><span>${esc(u.name)} (${u.role})</span><button class="ghost" data-act="out">Sign out</button></div></header>`+(u.role==='admin'?adminView():userView(u));
+}
+function userView(u){
+  const total=bal(u),pd=pendingDays(me);
+  const bs=u.batches.filter(b=>b.expires>=today()).sort((a,b)=>a.expires<b.expires?-1:1);
+  const mine=Object.entries(reqs).filter(([,r])=>r.user===me).sort((a,b)=>b[1].created-a[1].created);
+  return `<div class="card"><h2>Your off balance</h2>
+  <div class="hero"><span class="big">${total}</span><span>day${total===1?'':'s'} available${pd?` <span class="mute">(${pd} pending approval)</span>`:''}</span></div>
+  ${bs.length?bs.map(b=>{const l=left(b.expires);return`<div class="batch ${l<=14?'soon':''}"><span class="d">${b.days}d</span><span class="exp">Expires ${fmt(b.expires)}, ${l===0?'today':l+' day'+(l===1?'':'s')+' left'}</span><div class="bar"><i style="width:${Math.max(4,Math.min(100,l/90*100))}%"></i></div></div>`}).join(''):'<p class="mute">You have no off balance right now.</p>'}</div>
+  <div class="card"><h2>Apply for off</h2><form id="apply">
+  <div class="row"><div><label for="s">Start date</label><input id="s" type="date" min="${today()}" required></div>
+  <div><label for="n">Number of days</label><input id="n" type="number" min="0.5" step="0.5" max="${Math.max(0,total-pd)}" required></div></div>
+  <label for="r">Remarks</label><textarea id="r" placeholder="Reason or anything the admin should know"></textarea>
+  <div class="err" id="aerr"></div><button>Submit application</button></form></div>
+  <div class="card"><h2>Your applications</h2>${mine.length?mine.map(([k,r])=>myReq(k,r)).join(''):'<p class="mute">No applications yet. Use the form above to apply.</p>'}</div>`;
+}
+const SH=['PM','PM','AM','AM','OFF','OFF'];
+const diff=(a,b)=>Math.round((new Date(b+'T00:00')-new Date(a+'T00:00'))/864e5);
+const shiftOf=(t,d)=>teamCfg[t]?SH[((diff(teamCfg[t],d)%6)+6)%6]:'OFF';
+const endOf=r=>{const d=new Date(r.start+'T00:00');d.setDate(d.getDate()+Math.ceil(r.days)-1);return iso(d)};
+const offsOn=d=>Object.values(reqs).filter(r=>r.status==='approved'&&r.start<=d&&d<=endOf(r));
+const pendKeys=()=>Object.entries(reqs).flatMap(([k,r])=>r.status==='pending'?['a:'+k]:r.status==='approved'&&r.cancel==='requested'?['c:'+k]:[]);
+function dayInfo(d){
+  const ids=new Set(offsOn(d).map(r=>r.user));
+  return['A','B','C'].map(t=>{const mem=Object.entries(staff).filter(([,x])=>x.team===t),away=mem.filter(([id])=>ids.has(id)),sh=shiftOf(t,d);
+    return{t,sh,n:mem.length,away,w:sh==='OFF'?0:mem.length-away.length}});
+}
+function myReq(k,r){
+  let act='';
+  if(r.status==='pending')act=`<button class="ghost" data-act="withdraw" data-id="${k}">Withdraw</button>`;
+  else if(r.status==='approved'&&r.cancel==='requested')act='<span class="pill pending">Cancellation requested</span>';
+  else if(r.status==='approved'&&r.start>=today())act=ui.cancelFor===k
+    ?`<form id="cancelreq" data-id="${k}" style="width:100%"><label for="cr">Reason for cancelling</label><textarea id="cr"></textarea><div class="actions"><button>Send cancellation request</button><button type="button" class="ghost" data-act="cancelclose">Keep my off</button></div></form>`
+    :`<button class="ghost" data-act="cancelopen" data-id="${k}">Request cancellation</button>`;
+  return `<div class="req"><div class="top"><strong>${fmt(r.start)} for ${r.days} day${r.days===1?'':'s'}</strong>${pill(r.status)}</div>${r.remarks?`<div class="remarks">${esc(r.remarks)}</div>`:''}${r.cancel==='declined'?'<div class="mute">Cancellation declined. Your off stays.</div>':''}${r.status==='cancelled'?'<div class="mute">Cancelled. The days were returned to your balance.</div>':''}<div class="actions" style="flex-wrap:wrap">${act}</div></div>`;
+}
+function adminView(){
+  const all=Object.entries(reqs).sort((a,b)=>b[1].created-a[1].created);
+  const pend=all.filter(([,r])=>r.status==='pending'),can=all.filter(([,r])=>r.status==='approved'&&r.cancel==='requested'),n=pend.length+can.length;
+  const tabs=`<div class="tabs">${[['req','Requests'],['dash','Dashboard'],['staff','Staff']].map(([k,l])=>`<button class="tab ${ui.tab===k?'on':''}" data-act="tab" data-t="${k}">${l}${k==='req'&&n?` (${n})`:''}</button>`).join('')}</div>`;
+  return tabs+(ui.tab==='dash'?dashView():ui.tab==='staff'?staffView():reqView(pend,can,all.filter(([,r])=>r.status!=='pending')));
+}
+function reqView(pend,can,done){
+  return (pend.length+can.length?`<div class="notice">${pend.length} application${pend.length===1?'':'s'} and ${can.length} cancellation request${can.length===1?'':'s'} waiting for your decision</div>`:'')+
+  `<div class="card"><h2>Pending applications</h2>${pend.length?pend.map(([k,r])=>`<div class="req"><div class="top"><strong>${esc(r.name)}: ${fmt(r.start)} for ${r.days} day${r.days===1?'':'s'}</strong><span class="mute">Balance ${staff[r.user]?bal(staff[r.user]):0}d</span></div>
+  ${r.remarks?`<div class="remarks">${esc(r.remarks)}</div>`:'<div class="mute">No remarks</div>'}
+  <div class="actions"><button data-act="approve" data-id="${k}">Approve</button><button class="bad" data-act="reject" data-id="${k}">Reject</button></div></div>`).join(''):'<p class="mute">Nothing to review. New applications appear here.</p>'}</div>
+  <div class="card"><h2>Cancellation requests</h2>${can.length?can.map(([k,r])=>`<div class="req"><div class="top"><strong>${esc(r.name)}: ${fmt(r.start)} for ${r.days} day${r.days===1?'':'s'}</strong></div>
+  <div class="remarks">${esc(r.cancelReason||'No reason given')}</div>
+  <div class="actions"><button data-act="cancelok" data-id="${k}">Approve and reimburse</button><button class="bad" data-act="canceldeny" data-id="${k}">Decline</button></div></div>`).join(''):'<p class="mute">No cancellation requests.</p>'}</div>
+  <div class="card"><h2>Past decisions</h2>${done.length?done.map(([,r])=>`<div class="req"><div class="top"><strong>${esc(r.name)}: ${fmt(r.start)} for ${r.days}d</strong>${pill(r.status)}</div>${r.remarks?`<div class="remarks">${esc(r.remarks)}</div>`:''}</div>`).join(''):'<p class="mute">No decisions yet.</p>'}</div>`;
+}
+function dashView(){
+  const [y,m]=ui.month.split('-').map(Number),nd=new Date(y,m,0).getDate(),pad=(new Date(y,m-1,1).getDay()+6)%7,sel=ui.day||today();
+  let cells=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(d=>`<div class="dow">${d}</div>`).join('')+'<div></div>'.repeat(pad);
+  for(let d=1;d<=nd;d++){
+    const ds=`${ui.month}-${String(d).padStart(2,'0')}`,inf=dayInfo(ds),o=offsOn(ds).length;
+    cells+=`<button class="day ${ds===sel?'sel':''} ${ds===today()?'tod':''}" data-act="day" data-d="${ds}"><b>${d}</b>${['AM','PM'].map(sh=>{const x=inf.find(i=>i.sh===sh);return x?`<span class="sh ${x.w<x.n?'low':''}">${sh} ${x.t} ${x.w}/${x.n}</span>`:''}).join('')}${o?`<span class="offc">${o} off</span>`:''}</button>`;
+  }
+  const inf=dayInfo(sel),un=offsOn(sel).filter(r=>!(staff[r.user]||{}).team);
+  const ap=Object.values(reqs).filter(r=>r.status==='approved').sort((a,b)=>a.start<b.start?-1:1);
+  return `<div class="card"><div class="mnav"><button class="ghost" data-act="mprev" aria-label="Previous month">Prev</button><h2 style="margin:0">${new Date(y,m-1,1).toLocaleDateString('en-SG',{month:'long',year:'numeric'})}</h2><button class="ghost" data-act="mnext" aria-label="Next month">Next</button></div>
+  <div class="cal">${cells}</div><p class="mute">Each day shows the team on AM and PM, with people working out of team size. Amber means someone is on off.</p></div>
+  <div class="card"><h2>${fmt(sel)}</h2>${inf.map(i=>`<div class="req"><div class="top"><strong>Team ${i.t}: ${i.sh==='OFF'?'rest day':i.sh+' shift'}</strong><span class="mute">${i.sh==='OFF'?'Not scheduled':i.w+' of '+i.n+' working'}</span></div>${i.away.length?`<div class="mute">On off: ${i.away.map(([,x])=>esc(x.name)).join(', ')}${i.sh==='OFF'?' (rest day anyway)':''}</div>`:''}</div>`).join('')}${un.length?`<div class="mute">On off, no team assigned: ${un.map(r=>esc(r.name)).join(', ')}</div>`:''}</div>
+  <div class="card"><h2>Approved offs</h2><div class="scroll"><table><tr><th>Name</th><th>Team</th><th>Dates</th><th>Days</th></tr>${ap.map(r=>`<tr><td>${esc(r.name)}</td><td>${(staff[r.user]||{}).team||'-'}</td><td>${fmt(r.start)}${endOf(r)!==r.start?' to '+fmt(endOf(r)):''}</td><td>${r.days}</td></tr>`).join('')||'<tr><td colspan="4" class="mute">No approved offs yet.</td></tr>'}</table></div></div>
+  <div class="card"><h2>Shift pattern</h2><form id="cfg"><p class="mute">Set the first PM day of each team's cycle. Cycle: PM, PM, AM, AM, off, off.</p><div class="row3">${['A','B','C'].map((t,i)=>`<div><label for="c${i}">Team ${t}</label><input id="c${i}" type="date" value="${teamCfg[t]||''}" required></div>`).join('')}</div><button style="margin-top:12px">Save shift pattern</button></form></div>`;
+}
+function staffView(){
+  const users=Object.entries(staff).filter(([,x])=>x.role!=='admin');
+  const opts=t=>[['','Unassigned'],['A','Team A'],['B','Team B'],['C','Team C']].map(([v,l])=>`<option value="${v}" ${(t||'')===v?'selected':''}>${l}</option>`).join('');
+  return `<div class="card"><h2>Staff off balances</h2><div class="scroll"><table><tr><th>Name</th><th>Team</th><th>Balance</th><th>Next expiry</th><th>All batches</th></tr>
+  ${users.map(([id,x])=>`<tr><td>${esc(x.name)}</td><td><select data-team="${id}" aria-label="Team for ${esc(x.name)}">${opts(x.team)}</select></td><td><strong>${bal(x)}d</strong></td><td>${nextExp(x)}</td><td class="mute">${x.batches.filter(b=>b.expires>=today()).map(b=>b.days+'d by '+fmt(b.expires)).join(', ')||'-'}</td></tr>`).join('')}</table></div></div>
+  <div class="card"><h2>Grant off</h2><form id="grant"><fieldset style="border:1px solid var(--line);border-radius:8px;padding:6px 12px"><legend style="font-weight:600;font-size:.9rem">Staff</legend><label style="font-weight:400;margin:4px 0"><input type="checkbox" id="gall" style="width:auto"> Select all</label>${users.map(([id,x])=>`<label style="font-weight:400;margin:4px 0"><input type="checkbox" name="gs" value="${id}" style="width:auto"> ${esc(x.name)}${x.team?' (Team '+x.team+')':''}</label>`).join('')}</fieldset>
+  <label for="g2">Days for each person</label><input id="g2" type="number" min="0.5" step="0.5" required>
+  <label for="g3">Expires on</label><input id="g3" type="date" min="${today()}" required><div class="err" id="gerr"></div><button>Add to balance</button></form></div>
+  <div class="card"><h2>Add staff</h2><form id="addstaff"><div class="row"><div><label for="a1">Username</label><input id="a1" required></div><div><label for="a2">Full name</label><input id="a2" required></div></div>
+  <div class="row"><div><label for="a3">Password</label><input id="a3" type="password" required></div><div><label for="a4">Team</label><select id="a4">${opts('A').replace(' selected','')}</select></div></div><div class="err" id="serr"></div><button>Add staff</button></form></div>`;
+}
+document.addEventListener('submit',async e=>{
+  e.preventDefault();const f=e.target.id;
+  if(f==='login'){
+    const id=$('#u').value.trim().toLowerCase(),h=await sha($('#p').value);
+    if(!staff[id]||staff[id].pass!==h){$('#lerr').textContent='Username or password is incorrect.';return}
+    me=id;try{sessionStorage.setItem('off_me',id)}catch(x){}
+    seen=new Set(pendKeys());render();
+  }
+  if(f==='apply'){
+    const u=staff[me],days=parseFloat($('#n').value),avail=bal(u)-pendingDays(me);
+    if(days>avail){$('#aerr').textContent=`You only have ${avail} day${avail===1?'':'s'} available after pending applications.`;return}
+    const id='r'+Date.now()+Math.random().toString(36).slice(2,6);
+    try{await put('requests',id,{user:me,name:u.name,start:$('#s').value,days,remarks:$('#r').value.trim(),status:'pending',created:Date.now()});toast('Application submitted')}
+    catch(x){$('#aerr').textContent='Could not submit. Check your connection and try again.'}
+  }
+  if(f==='grant'){
+    const ids=[...document.querySelectorAll('input[name=gs]:checked')].map(i=>i.value);
+    if(!ids.length){$('#gerr').textContent='Select at least one staff member.';return}
+    const days=parseFloat($('#g2').value),exp=$('#g3').value;
+    try{
+      for(const id of ids){const s=JSON.parse(JSON.stringify(staff[id]));s.batches.push({days,expires:exp});await put('staff',id,s)}
+      toast(`Added ${days} day${days===1?'':'s'} to ${ids.length} staff`)
+    }catch(x){$('#gerr').textContent='Could not save. Try again.'}
+  }
+});
+document.addEventListener('click',async e=>{
+  const b=e.target.closest('[data-act]');if(!b)return;
+  const act=b.dataset.act,id=b.dataset.id;
+  if(act==='out'){me=null;try{sessionStorage.removeItem('off_me')}catch(x){}render()}
+  if(act==='approve'||act==='reject'){
+    const r={...reqs[id]};
+    if(act==='approve'){
+      const u=JSON.parse(JSON.stringify(staff[r.user]));
+      if(bal(u)<r.days){toast('Not enough balance to approve this request');return}
+      r.used=deduct(u,r.days);r.status='approved';
+      try{await put('staff',r.user,u);await put('requests',id,r);toast('Approved')}catch(x){toast('Could not save. Try again.')}
+    }else{r.status='rejected';try{await put('requests',id,r);toast('Rejected')}catch(x){toast('Could not save. Try again.')}}
+  }
+});
+document.addEventListener('submit',async e=>{
+  e.preventDefault();const f=e.target.id;
+  try{
+    if(f==='cancelreq'){const id=e.target.dataset.id;await put('requests',id,{...reqs[id],cancel:'requested',cancelReason:$('#cr').value.trim()});ui.cancelFor=null;toast('Cancellation request sent')}
+    if(f==='cfg'){await put('config','teams',{A:$('#c0').value,B:$('#c1').value,C:$('#c2').value});toast('Shift pattern saved')}
+    if(f==='addstaff'){
+      const id=$('#a1').value.trim().toLowerCase();
+      if(!/^[a-z0-9._-]+$/.test(id)){$('#serr').textContent='Use letters, numbers, dots, dashes or underscores in the username.';return}
+      if(staff[id]){$('#serr').textContent='That username is taken. Choose another.';return}
+      const t=$('#a4').value;await put('staff',id,{name:$('#a2').value.trim(),role:'user',pass:await sha($('#a3').value),batches:[],...(t?{team:t}:{})});toast('Staff added')
+    }
+  }catch(x){toast('Could not save. Try again.')}
+});
+document.addEventListener('click',async e=>{
+  const b=e.target.closest('[data-act]');if(!b)return;
+  const a=b.dataset.act,id=b.dataset.id;
+  try{
+    if(a==='tab'){ui.tab=b.dataset.t;render()}
+    if(a==='day'){ui.day=b.dataset.d;render()}
+    if(a==='mprev'||a==='mnext'){const[y,m]=ui.month.split('-').map(Number),d=new Date(y,m-1+(a==='mnext'?1:-1),1);ui.month=iso(d).slice(0,7);render()}
+    if(a==='cancelopen'){ui.cancelFor=id;render()}
+    if(a==='cancelclose'){ui.cancelFor=null;render()}
+    if(a==='withdraw')await put('requests',id,{...reqs[id],status:'withdrawn'});
+    if(a==='canceldeny'){await put('requests',id,{...reqs[id],cancel:'declined'});toast('Cancellation declined')}
+    if(a==='cancelok'){
+      const r={...reqs[id]},u=JSON.parse(JSON.stringify(staff[r.user]));let lost=0;
+      for(const x of r.used||[{days:r.days,expires:plus(30)}]){if(x.expires<today())lost+=x.days;const t=u.batches.find(q=>q.expires===x.expires);t?t.days+=x.days:u.batches.push({days:x.days,expires:x.expires})}
+      r.status='cancelled';r.cancel='approved';
+      await put('staff',r.user,u);await put('requests',id,r);
+      toast(lost?`Reimbursed. ${lost} day${lost===1?'':'s'} had already expired.`:'Cancelled and reimbursed')
+    }
+  }catch(x){toast('Could not save. Try again.')}
+});
+document.addEventListener('change',async e=>{
+  const id=e.target.dataset&&e.target.dataset.team;if(!id)return;
+  const x=JSON.parse(JSON.stringify(staff[id]));if(e.target.value)x.team=e.target.value;else delete x.team;
+  try{await put('staff',id,x);toast('Team updated')}catch(err){toast('Could not save. Try again.')}
+});
+document.addEventListener('change',e=>{if(e.target.id==='gall')document.querySelectorAll('input[name=gs]').forEach(i=>i.checked=e.target.checked)});
+init();
+</script></body></html>
